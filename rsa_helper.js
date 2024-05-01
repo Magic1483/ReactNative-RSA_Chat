@@ -19,11 +19,17 @@ export const RSA_Encrypt = async (text) => {
 export const RSA_Decrypt = async (text,client_key) => {
     text = JSON.parse(text)
     // console.log('try decrypt',text.msg.length);
-    RSA.decrypt(text.msg,client_key)
 
-    const res = await RSA.decrypt(text.msg,client_key)
+    let res = text.msg
+    try {
+        res = await RSA.decrypt(text.msg,client_key)
 
-    console.log('decrypt_client length',res);
+        console.log('decrypt_client',res);
+        return res
+    } catch (error) {
+        console.log('decrypt error ',error);
+    }
+    
     return res
 }
 

@@ -2,7 +2,7 @@ import { View, Text ,TextInput,Button, Pressable} from 'react-native'
 import React, {  useEffect, useState } from 'react'
 import { storage } from './clients_mmkv'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-
+import {Alert} from 'react-native'
 
 const AddClient = (props) => {
 
@@ -37,16 +37,19 @@ const AddClient = (props) => {
         
         // console.log('edit client',props.dest_client);
         let client = JSON.parse(storage.getString(props.dest_client))
-
+        console.log(client);
         client.key = key
+        client.nick = nick
 
         console.log(client);
-        
         storage.set(nick,JSON.stringify(client))
 
         props.setIsEdit(false)
+        Alert.alert('Update user info for '+nick)
         console.log('edit client',props.dest_client);
 
+        const res = storage.getAllKeys();
+        props.setClients(res);
         
     }
 

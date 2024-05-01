@@ -122,7 +122,7 @@ const ClientsScreen = ({navigation,nick,messages,setMessages,websocket}) => {
       )
     }else{
       return (
-        <AddClient mode='edit' dest_client={dest_client} setIsEdit={setIsEdit} />
+        <AddClient mode='edit' dest_client={dest_client} setIsEdit={setIsEdit} setClients={setClients} />
       )
     }
     

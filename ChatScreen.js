@@ -33,7 +33,7 @@ function ChatScreen (props){
 
             return {from,msg:decrypted_msg,to}
           }))
-          console.log('ds',decrypted);
+          //  console.log('ds',decrypted);
           return decrypted
         }
 
@@ -41,9 +41,9 @@ function ChatScreen (props){
           const res = JSON.parse(storage.getString(props.dest_client));
           const nick =  await  AsyncStorage.getItem('nick')
 
-          console.log('handke decrypt',messages);
+          // console.log('handke decrypt',messages);
           const decrypted = await decryptAllMsgs(messages, res.key,nick);
-          console.log('ds2',decrypted);
+          // console.log('ds2',decrypted);
           setDecryptedMessages(decrypted);
         };
 
@@ -58,7 +58,6 @@ function ChatScreen (props){
           console.log('get client',props.dest_client);
           setMessage_to(props.dest_client)
           props.setMessages(res.messages);
-          // handleDecrypt(res.messages,res.key)
           set_client(res)
 
 
@@ -125,13 +124,9 @@ function ChatScreen (props){
 
           const encrypted_text = await RSA_Encrypt(text,publicKey)
           console.log('encoded',encrypted_text);
-
           
           let msg = JSON.stringify({'from':nick,'to':message_to,'msg':encrypted_text})
           
-          console.log('msg is',msg);
-
-
           props.setMessages((prevMsg)=>[...prevMsg,msg]);
 
           client.messages.push(msg);
@@ -139,9 +134,7 @@ function ChatScreen (props){
 
           SendMessage(props.websocket,nick,message_to,msg)
           storage.set(message_to,JSON.stringify(client))
-
           setText('')
-
           };
 
         
@@ -219,7 +212,8 @@ function ChatScreen (props){
                 {decryptedMessages && <FlatList 
                   data={[...decryptedMessages].reverse()} 
                   renderItem={(el)=>HandleMessage(el.item)}
-                  keyExtractor={(el)=>el.index}
+                  keyExtractor={(item,index)=>'key'+index}
+                  key={el => el.index}
                   inverted
                   />}
                   

@@ -6,11 +6,10 @@ const reset_addr = async () => {
   console.log('[WS] serv_addr reset');
 }
 
-export const ConnectWebsocket = (message_from,setMessages,set_connected,addr) => {
+export const ConnectWebsocket = (message_from,setMessages,set_connected,addr,set_websocket) => {
     // const ws = new WebSocket('ws://192.168.100.3:9000')
-    console.log('Curr addr is',addr);
+    console.log('[WebSocket] Curr addr is',addr);
     const ws = new WebSocket(JSON.parse(addr))
-    console.log('WS',ws);
 
     ws.onopen = () => {
         console.info('WebSocket connection opened')
@@ -50,8 +49,10 @@ export const ConnectWebsocket = (message_from,setMessages,set_connected,addr) =>
       };
   
     ws.onclose = (event) => {
-        console.warn('WebSocket connection closed:', event);
-        set_connected(false)
+        set_connected(false);
+        set_websocket(null);
+        console.warn('[WebSocket] connection closed');
+        
     };
 
     return ws
@@ -66,7 +67,5 @@ export const SendMessage = async (ws,message_from,message_to,text) => {
                 let msg = JSON.stringify({'from':message_from,'to':message_to,'msg':text})  //!STRINGIFY
                 ws.send(msg);
                 
-                // setMessages((prevMsg)=>[...prevMsg,msg]);
-                // setMessage(msg);
             }
 }

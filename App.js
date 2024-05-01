@@ -44,32 +44,53 @@ function App() {
   const [nick,set_nick] = useState('')
 
   const [messages,setMessages] = useState([])//saved Messages
-  const [websocket,set_websocket] = useState([])//saved Messages
+  const [websocket,set_websocket] = useState(null)//saved Messages
+  const [server_addr,set_server_addr] = useState([])
+
+ 
+
 
   useEffect(()=>{
     const getstate = async () =>{
       const is_login = await AsyncStorage.getItem('isLogin')
       const nick = await AsyncStorage.getItem('nick')
-      set_nick(nick)
+      set_nick(nick);
+      const addr = await get_addr();
+      set_server_addr(addr);
 
       console.log('[App] login status',is_login);
       console.log('[App] conn status ',connected);
 
       if (is_login == 'true' && connected==false){
 
-        const addr = await get_addr();
+        console.log('[APP ROOT] addr from storage is',addr);
         set_is_login(true)
-        set_websocket(ConnectWebsocket(nick,setMessages,set_connected,addr))
-        
+
+        set_websocket(ConnectWebsocket(nick,setMessages,set_connected,addr,set_websocket))
 
       }
-
       
 
     }
 
     getstate()
   },[])
+
+  
+  useEffect(()=>{
+    const reconnect = async () => {
+      console.log('websocket is null',websocket==null);
+      const addr = await get_addr();
+
+      if (websocket == null && isLogin==true && connected==false){
+        console.log('[APP ROOT] addr from storage is',addr);
+        set_websocket(ConnectWebsocket(nick,setMessages,set_connected,addr,set_websocket))
+      }
+    }
+
+    reconnect()
+
+  },[websocket])
 
 
 
@@ -79,7 +100,7 @@ function App() {
       const privkey =await AsyncStorage.getItem('private_key')
 
       if(pubkey==null || privkey==null){
-        Alert.alert('WARNING KEYS NOT GENERATED')
+        Alert.alert('WARNING KEYS NOT GENERATED ver 1.1')
       }
     }
 
@@ -101,10 +122,10 @@ function App() {
               {props => <ClientsScreen {...props} nick={nick} messages={messages} setMessages={setMessages} websocket={websocket} />} 
             </Drawer.Screen>
 
-            {/* <Drawer.Screen name='Chat' component={ChatScreen} options={({ route }) => ({ title: route.params?.title || 'Chat' ,drawerItemStyle: { height: 0 }})} /> */}
             <Drawer.Screen name='AddClient' component={AddClient}/>
             <Drawer.Screen name='Profile'>
-              {props => <Profile {...props} set_is_login={set_is_login} connected={connected}/>}
+              {props => <Profile {...props} set_is_login={set_is_login} connected={connected} set_connected={set_connected} 
+              set_server_addr={set_server_addr} websocket={websocket} set_websocket={set_websocket} />}
             </Drawer.Screen>
             
             
@@ -112,7 +133,6 @@ function App() {
         </NavigationContainer>
   )
   }
-
   
 }
 

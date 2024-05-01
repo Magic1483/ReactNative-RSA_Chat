@@ -37,6 +37,8 @@ function LoginScreen ({set_is_login}) {
                         await AsyncStorage.setItem('isLogin','true')
                         set_is_login(true)
                         
+                    } else {
+                        Alert.alert('Login is invalid!')
                     }
                 })
 

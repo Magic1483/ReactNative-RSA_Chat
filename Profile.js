@@ -30,7 +30,7 @@ const remove_RSA_keys = async()=>{
   }
 }
 
-const Profile = ({navigation,set_is_login,connected}) => {
+const Profile = ({navigation,set_is_login,connected,set_connected,set_server_addr,websocket,set_websocket}) => {
 
     const [nick,set_nick] = useState('')
     const [server_addr,setServer_addr] = useState('')
@@ -39,7 +39,11 @@ const Profile = ({navigation,set_is_login,connected}) => {
         get_info = async () => {
             const res = await AsyncStorage.getItem('nick')
             const servAddr = await AsyncStorage.getItem('serv_addr')
-            setServer_addr(servAddr)
+            if (servAddr == null){
+                setServer_addr("ws://127.0.0.1:9000")
+            }else {
+                setServer_addr(servAddr.slice(1,-1))
+            }
             set_nick(res)
             
         }
@@ -48,27 +52,29 @@ const Profile = ({navigation,set_is_login,connected}) => {
     },[])
     
 
-    useEffect(()=>{
-        console.log('connected',connected);
-    },[connected])
+    
 
     
     const changeServerAddr = async () => {
         await AsyncStorage.setItem('serv_addr',JSON.stringify(server_addr))
+        console.log('[PROFILE] Close websoket');
+        websocket.close()
+        set_server_addr(server_addr)
         console.log('[PROFILE] Change server addr to',server_addr);
-
+        Alert.alert('Server address changed!')
     }
 
     const exit = async () => {
         console.log('exit');
+        await AsyncStorage.setItem('isLogin','false')
         set_is_login(false)
     }
 
 
     deleteProfile = async () => {
         console.log('deleteProfile');
-        await AsyncStorage.removeItem('nick')
-        await AsyncStorage.removeItem('pass')
+        await AsyncStorage.clear()
+        
         await AsyncStorage.setItem('isLogin','false')
         storage.clearAll()
         
