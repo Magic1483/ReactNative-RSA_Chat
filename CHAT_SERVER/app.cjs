@@ -1,10 +1,21 @@
 const WebSocket = require('ws');
 const wsServer = new WebSocket.Server({ port: 9000 });
+const AddMsg = require('./redis-service.cjs')
+const redisService = require('./redis-service.cjs')
 
 // wsServer.on('connection', onConnect);
 
 
 const clients = new Map();
+
+async function checkOldMessages(for_user,m_type){
+  let old_messages = await redisService.GetMessagesByNick(for_user)
+  console.log('saved messages for',for_user,old_messages.length);
+  old_messages.reverse().forEach(el => {
+    let msg = JSON.parse(el)
+    sendToClient(msg['from'],for_user,el,m_type)
+  });
+}
 
 wsServer.on('connection',(ws)=>{
   let greeting = JSON.stringify({'from':'SERVER','to':'new client',"msg":'who_is_you'})
@@ -20,11 +31,12 @@ wsServer.on('connection',(ws)=>{
 
     if(m['i']) {
       // set client id
-      console.log('new client');
       
       clients.set(m['i'],ws)
-      console.log('Новый пользователь',m['i']);
-      console.log(m);
+      console.log('Новый пользователь',m['i'],m['type']);
+
+      checkOldMessages(m['i'])
+      
       
     } 
     else {
@@ -36,38 +48,21 @@ wsServer.on('connection',(ws)=>{
 
   ws.on('close', () => {
     deleteByValue(clients,ws)
-    console.log(`Client  disconnected`);
-    console.log(clients);
   });
 })
 
-function onConnect(wsClient) {
-    console.log('Новый пользователь');
-    wsClient.send('Привет');
-
-    wsClient.on('close', function() {
-        console.log('Пользователь отключился');
-    });
-
-    wsClient.on('message', function(message) {
-        console.log(message);
-        const jsonMessage = JSON.parse(message);
-        let client_nick = jsonMessage['i'];
-      
-
-        clients.set(client_nick,wsClient)
-        
-    });
-}
 
 function sendToClient(from,to_client, message,type,dinf) {
   const client = clients.get(to_client);
-  
+  console.log('send msg to',to_client,'from',from);
+
   if (client) {
     let resp = JSON.stringify({'from':from,'to':to_client,"msg":message,"type":type,"dinf":dinf})
     client.send(resp);
   } 
   else  {
+    console.log('test',message);
+    redisService.AddMsg(to_client,message)//Add msg to queue in redis
     sendToClient('SERVER',from,`Client ${to_client} is not connected`,'text',to_client)
   }
 }
@@ -76,7 +71,7 @@ function deleteByValue(map, value) {
   for (const [key, val] of map.entries()) {
     if (val === value) {
       map.delete(key);
-      console.log(`Deleted key: ${key}, value: ${value}`);
+      console.log(`Client disconnected: ${key}`);
       return;
     }
   }
