@@ -33,7 +33,7 @@ wsServer.on('connection',(ws)=>{
       // set client id
       
       clients.set(m['i'],ws)
-      console.log('Новый пользователь',m['i'],m['type']);
+      console.log('Новый пользователь',m['i']);
 
       checkOldMessages(m['i'])
       

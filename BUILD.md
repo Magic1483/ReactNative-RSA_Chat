@@ -7,3 +7,4 @@
 
 - `adb  -s <device_id> install -r .\android\app\build\outputs\apk\release\app-release.apk`
 
+[ioredis](https://github.com/redis/ioredis)

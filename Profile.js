@@ -40,7 +40,7 @@ const Profile = ({navigation,set_is_login,connected,set_connected,set_server_add
             const res = await AsyncStorage.getItem('nick')
             const servAddr = await AsyncStorage.getItem('serv_addr')
             if (servAddr == null){
-                setServer_addr("ws://127.0.0.1:9000")
+                setServer_addr("ws://192.168.100.2:9000")
             }else {
                 setServer_addr(servAddr.slice(1,-1))
             }
@@ -58,7 +58,11 @@ const Profile = ({navigation,set_is_login,connected,set_connected,set_server_add
     const changeServerAddr = async () => {
         await AsyncStorage.setItem('serv_addr',JSON.stringify(server_addr))
         console.log('[PROFILE] Close websoket');
-        websocket.close()
+        try {
+            websocket.close()
+        } catch (error) {
+            console.log('can not close websocket')
+        }
         set_server_addr(server_addr)
         console.log('[PROFILE] Change server addr to',server_addr);
         Alert.alert('Server address changed!')
